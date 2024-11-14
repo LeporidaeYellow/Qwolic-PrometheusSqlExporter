@@ -1,0 +1,30 @@
+connections:
+
+  - name: 'sql-1'
+    url: 'jdbc:oracle:thin:@host:1521/database'
+    user: 'user'
+    pass: 'password'
+    connectId: 'sql-1'
+    driverName: 'oracle'
+
+  - name: 'sql-2'
+    url: 'jdbc:postgresql://host:5432/database'
+    user: 'user'
+    pass: 'password'
+    connectId: 'sql-2'
+    driverName: 'postgresql'
+
+metrics:
+
+  - name: testing_sql_request
+    description: "<Testing count>"
+    connectId: 'sql-1'
+    query:
+      SELECT COUNT(*) 
+      FROM data 
+      WHERE status=1
+    metricType: gauge
+    labels: [
+      "env", "dev",
+      "service", "database"
+    ]
