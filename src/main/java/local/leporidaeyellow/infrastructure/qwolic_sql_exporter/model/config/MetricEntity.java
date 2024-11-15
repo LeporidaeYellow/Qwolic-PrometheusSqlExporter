@@ -9,6 +9,7 @@ public class MetricEntity {
     private List<String> labels;
     private String metricType;
     private String connectId;
+    private long timeout;
 
     public String getName() {
         return name;
@@ -58,6 +59,14 @@ public class MetricEntity {
         this.connectId = connectId;
     }
 
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
     public  String getConcurrentRegistryName() {
         return name + "_" + metricType;
     }
@@ -71,6 +80,7 @@ public class MetricEntity {
                 ", labels=" + labels +
                 ", metricType='" + metricType + '\'' +
                 ", connectId='" + connectId + '\'' +
+                ", timeout=" + timeout +
                 '}';
     }
 }

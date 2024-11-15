@@ -24,6 +24,7 @@ metrics:
       FROM data 
       WHERE status=1
     metricType: gauge
+    timeout: 300
     labels: [
       "env", "dev",
       "service", "database"
