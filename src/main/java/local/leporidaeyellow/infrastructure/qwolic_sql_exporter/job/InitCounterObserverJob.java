@@ -27,7 +27,7 @@ public class InitCounterObserverJob {
 
     void executeSqlForCounters() {
         configService
-                .getMetricEntityList(Constants.METRIC_COUNTER)
+                .getMetricEntityListByType(Constants.METRIC_COUNTER)
                 .parallelStream()
                 .forEach(metric -> {
                     try {

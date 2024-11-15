@@ -17,13 +17,14 @@ connections:
 metrics:
 
   - name: testing_sql_request
-    description: "<Testing count>"
+    description: "<Testing gauge>"
     connectId: 'sql-1'
     query:
-      SELECT COUNT(*) 
+      SELECT COUNT(*)
       FROM data 
       WHERE status=1
     metricType: gauge
+    timeout: 300
     labels: [
       "env", "dev",
       "service", "database"

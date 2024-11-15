@@ -35,10 +35,10 @@ public class ConfigService {
         return this.config.getMetrics();
     }
 
-    public List<MetricEntity> getMetricEntityList(String metricType) {
+    public List<MetricEntity> getMetricEntityListByType(String metricType) {
         return getMetricsEntitiesList()
                 .stream()
-                .filter(o -> o.getMetricType().contains(metricType))
+                .filter(o -> o.getMetricType().equals(metricType))
                 .toList();
     }
 }

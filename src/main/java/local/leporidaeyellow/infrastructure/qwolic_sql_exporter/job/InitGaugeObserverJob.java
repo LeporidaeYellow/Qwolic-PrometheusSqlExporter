@@ -27,7 +27,7 @@ public class InitGaugeObserverJob {
 
     void executeSqlForGauges() {
         configService
-                .getMetricEntityList(Constants.METRIC_GAUGE)
+                .getMetricEntityListByType(Constants.METRIC_GAUGE)
                 .parallelStream()
                 .forEach(metric -> {
                     try {

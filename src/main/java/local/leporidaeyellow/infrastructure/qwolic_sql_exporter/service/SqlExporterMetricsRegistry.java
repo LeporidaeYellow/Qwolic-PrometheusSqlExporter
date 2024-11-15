@@ -23,6 +23,7 @@ import static local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configura
 public class SqlExporterMetricsRegistry {
     Map<String, Object> metricMap = new HashMap<>();
     Map<String, AtomicInteger> atomicIntegerMap = new HashMap<>();
+    Map<String, Connection> connectionMap = new HashMap<>();
 
     MeterRegistry meterRegistry;
 
@@ -33,29 +34,33 @@ public class SqlExporterMetricsRegistry {
         this.meterRegistry = meterRegistry;
     }
 
-    public Counter getCounter(MetricEntity metricEntity) {
-        if (!metricMap.keySet().contains(metricEntity.getName())) {
-            Counter counter = Counter.builder(metricEntity.getName())
-                    .tags(metricEntity.getLabels().toArray(new String[0]))
-                    .description(metricEntity.getDescription())
-                    .register(meterRegistry);
-            metricMap.put(metricEntity.getName(), counter);
-        }
-        return (Counter) metricMap.get(metricEntity.getName());
+    public Connection getConnection(MetricEntity metric) {
+        return connectionMap.get(metric.getConcurrentRegistryName());
     }
 
-    public Gauge getGauge(MetricEntity metricEntity) {
-        if (!metricMap.keySet().contains(metricEntity.getName())) {
-            AtomicInteger atomicInteger = new AtomicInteger(-1);
-            atomicIntegerMap.put(metricEntity.getName(), atomicInteger);
-
-            Gauge.Builder<Supplier<Number>> build = Gauge.builder(metricEntity.getName(), () -> atomicInteger);
-            build.tags(metricEntity.getLabels().toArray(new String[0]));
-            build.description(metricEntity.getDescription());
-            Gauge gauge = build.register(meterRegistry);
-            metricMap.put(metricEntity.getName(), gauge);
+    public Counter getCounter(MetricEntity metric) {
+        if (!metricMap.keySet().equals(metric.getConcurrentRegistryName())) {
+            Counter counter = Counter.builder(metric.getName())
+                    .tags(metric.getLabels().toArray(new String[0]))
+                    .description(metric.getDescription())
+                    .register(meterRegistry);
+            metricMap.put(metric.getConcurrentRegistryName(), counter);
         }
-        return (Gauge) metricMap.get(metricEntity.getName());
+        return (Counter) metricMap.get(metric.getConcurrentRegistryName());
+    }
+
+    public Gauge getGauge(MetricEntity metric) {
+        if (!metricMap.keySet().equals(metric.getConcurrentRegistryName())) {
+            AtomicInteger atomicInteger = new AtomicInteger(-1);
+            atomicIntegerMap.put(metric.getConcurrentRegistryName(), atomicInteger);
+
+            Gauge.Builder<Supplier<Number>> build = Gauge.builder(metric.getName(), () -> atomicInteger);
+            build.tags(metric.getLabels().toArray(new String[0]));
+            build.description(metric.getDescription());
+            Gauge gauge = build.register(meterRegistry);
+            metricMap.put(metric.getConcurrentRegistryName(), gauge);
+        }
+        return (Gauge) metricMap.get(metric.getConcurrentRegistryName());
     }
 
     public Double executeQueryForDoubleValue(MetricEntity metric) {
@@ -64,6 +69,7 @@ public class SqlExporterMetricsRegistry {
 
         try {
             connection = connectionService.popConnection(metric.getConnectId());
+            connectionMap.put(metric.getConcurrentRegistryName(), connection);
             connection.setReadOnly(true);
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(metric.getQuery());
@@ -73,6 +79,12 @@ public class SqlExporterMetricsRegistry {
             throw new RuntimeException(e);
         }
 
+        closeConnection(connection);
+
+        return metricValue;
+    }
+
+    public void closeConnection(Connection connection) {
         try {
             connection.close();
             if (!connection.isClosed()) {
@@ -81,16 +93,15 @@ public class SqlExporterMetricsRegistry {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return metricValue;
     }
 
     public void setValueToMetrics(MetricEntity metric, CompletableFuture<Double> future) {
-        if (metric.getMetricType().contains(METRIC_COUNTER)) {
+        if (metric.getMetricType().equals(METRIC_COUNTER)) {
             getCounter(metric).increment(future.join());
         }
-        if (metric.getMetricType().contains(METRIC_GAUGE)) {
+        if (metric.getMetricType().equals(METRIC_GAUGE)) {
             getGauge(metric);
-            val result = atomicIntegerMap.get(metric.getName());
+            val result = atomicIntegerMap.get(metric.getConcurrentRegistryName());
             result.set(future.join().intValue());
         }
     }

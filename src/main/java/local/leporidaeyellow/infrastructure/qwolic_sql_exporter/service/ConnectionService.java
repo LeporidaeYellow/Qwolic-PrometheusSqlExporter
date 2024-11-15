@@ -42,7 +42,7 @@ public class ConnectionService {
         ConnectionEntity connection = getConnectionEntityByConnectIdFromConfig(connectId);
         Connection conn = dataBaseConnectionBuilderService.createOracleConnection(connection);
         map.put(connection.getConnectId(), conn);
-        return map.containsValue(conn);
+        return map.equals(conn);
     }
 
     public boolean keyExist(String connectId) {
@@ -57,7 +57,7 @@ public class ConnectionService {
         AtomicReference<ConnectionEntity> connection = new AtomicReference<>();
         configService.getConnectionList()
                 .forEach(entity -> {
-                    if (entity.getConnectId().contains(connectId)) connection.set((ConnectionEntity) entity);
+                    if (entity.getConnectId().equals(connectId)) connection.set((ConnectionEntity) entity);
                 });
         return connection.get();
     }
