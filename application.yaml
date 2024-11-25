@@ -1,11 +1,3 @@
-# Qwolic-PrometheusSqlExporter ver.0.x
-
-## Prometheus metrics Project for asynchronous requests to databases.
-
-Is used simple yaml-config "application.yaml" for implementing database connections and metrics. Also metrics (counter, gauge) mapped to db-connections via tag "connectId", what makes using more one connection to databases (oracle, postgres).
-
-```dtd
-
 connections:
 
   - name: 'sql-1'
@@ -37,6 +29,3 @@ metrics:
       "env", "dev",
       "service", "database"
     ]
-
-
-```
