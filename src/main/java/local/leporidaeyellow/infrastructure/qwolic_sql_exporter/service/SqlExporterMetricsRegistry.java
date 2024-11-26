@@ -65,8 +65,7 @@ public class SqlExporterMetricsRegistry {
 
     public Double executeQueryForDoubleValue(MetricEntity metric) {
         double metricValue;
-        Connection connection;
-
+        Connection connection = null;
         try {
             connection = connectionService.popConnection(metric.getConnectId());
             connectionMap.put(metric.getConcurrentRegistryName(), connection);
@@ -77,21 +76,22 @@ public class SqlExporterMetricsRegistry {
             metricValue = Double.parseDouble(rs.getString(1));
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
+        } finally {
+            closeConnection(connection);
         }
-
-        closeConnection(connection);
-
         return metricValue;
     }
 
     public void closeConnection(Connection connection) {
-        try {
-            connection.close();
-            if (!connection.isClosed()) {
-                System.out.println("Connection is not closed");
+        if (connection != null) {
+            try {
+                connection.close();
+                if (!connection.isClosed()) {
+                    System.out.println("Connection is not closed");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
