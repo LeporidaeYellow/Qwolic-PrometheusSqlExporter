@@ -24,7 +24,7 @@ public class ConnectionService {
         ConnectionEntity connection = getConnectionEntityByConnectIdFromConfig(connectId);
         if (!keyExist(connectId) || getValue(connectId) == null) {
             setConnection(connectId);
-            return dataBaseConnectionBuilderService.createOracleConnection(connection);
+            return dataBaseConnectionBuilderService.createDataBaseConnection(connection);
         } else {
             Connection existConnection = getConnection(connectId);
             setConnection(connectId);
@@ -40,7 +40,7 @@ public class ConnectionService {
 
     public Boolean setConnection(String connectId) throws SQLException, ClassNotFoundException {
         ConnectionEntity connection = getConnectionEntityByConnectIdFromConfig(connectId);
-        Connection conn = dataBaseConnectionBuilderService.createOracleConnection(connection);
+        Connection conn = dataBaseConnectionBuilderService.createDataBaseConnection(connection);
         map.put(connection.getConnectId(), conn);
         return map.equals(conn);
     }
