@@ -19,7 +19,7 @@ public class CleanConcurrentRegistryJob {
     @Autowired
     ConfigService configService;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(cron = "${scheduler.period}")
     public void taskForCleanBlockedQuery() {
         cleanRegistryByExpiredTimeout();
     }
