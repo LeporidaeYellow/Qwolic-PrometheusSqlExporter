@@ -20,7 +20,7 @@ public class InitCounterObserverJob {
     @Autowired
     ConcurrentMetricRegistryService concurrentRegistry;
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "${scheduler.period}")
     public void taskForCounters() {
         executeSqlForCounters();
     }
