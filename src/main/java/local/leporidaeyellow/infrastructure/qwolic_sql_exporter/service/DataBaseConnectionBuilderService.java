@@ -11,8 +11,9 @@ import java.sql.SQLException;
 public class DataBaseConnectionBuilderService {
     static private final String ORACLE_DB_DRIVER = "oracle.jdbc.driver.OracleDriver";
     static private final String POSTGRES_DB_DRIVER = "org.postgresql.ds.PGSimpleDataSource";
+    static private final String CLICKHOUSE_DB_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
 
-    public Connection createOracleConnection(ConnectionEntity connectionEntity) throws ClassNotFoundException, SQLException {
+    public Connection createDataBaseConnection(ConnectionEntity connectionEntity) throws ClassNotFoundException, SQLException {
         //register driver class
         Class.forName(getDbDriver(connectionEntity.getDriverName()));
         //establish connection
@@ -25,6 +26,7 @@ public class DataBaseConnectionBuilderService {
         switch (nameDb) {
             case "oracle": return ORACLE_DB_DRIVER;
             case "postgresql": return POSTGRES_DB_DRIVER;
+            case "clickhouse": return CLICKHOUSE_DB_DRIVER;
             default: return "ERROR name of driver";
         }
     }

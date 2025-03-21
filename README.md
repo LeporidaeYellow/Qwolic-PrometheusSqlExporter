@@ -2,7 +2,7 @@
 
 ## Prometheus metrics Project for asynchronous requests to databases.
 
-Is used simple yaml-config "application.yaml" for implementing database connections and metrics. Also metrics (counter, gauge) mapped to db-connections via tag "connectId", what makes using more one connection to databases (oracle, postgres).
+Is used simple yaml-config "application.yaml" for implementing database connections and metrics. Also metrics (counter, gauge) mapped to db-connections via tag "connectId", what makes using more one connection to databases (oracle, postgres, clickhouse).
 
 
 Configuration file description:

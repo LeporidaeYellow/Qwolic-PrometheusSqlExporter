@@ -2,7 +2,6 @@ package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service;
 
 import io.micrometer.core.instrument.*;
 import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config.MetricEntity;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,7 @@ public class SqlExporterMetricsRegistry {
     }
 
     public Gauge getGauge(MetricEntity metric) {
-        if (!metricMap.keySet().equals(metric.getConcurrentRegistryName())) {
+        if (atomicIntegerMap.get(metric.getConcurrentRegistryName()) == null) {
             AtomicInteger atomicInteger = new AtomicInteger(-1);
             atomicIntegerMap.put(metric.getConcurrentRegistryName(), atomicInteger);
 
@@ -101,7 +100,7 @@ public class SqlExporterMetricsRegistry {
         }
         if (metric.getMetricType().equals(METRIC_GAUGE)) {
             getGauge(metric);
-            val result = atomicIntegerMap.get(metric.getConcurrentRegistryName());
+            AtomicInteger result = atomicIntegerMap.get(metric.getConcurrentRegistryName());
             result.set(future.join().intValue());
         }
     }
