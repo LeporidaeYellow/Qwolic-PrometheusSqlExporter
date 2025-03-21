@@ -63,16 +63,16 @@ public class SqlExporterMetricsRegistry {
     }
 
     public Double executeQueryForDoubleValue(MetricEntity metric) {
-        double metricValue;
+        double metricValue = -1.0;
         Connection connection = null;
         try {
             connection = connectionService.popConnection(metric.getConnectId());
             connectionMap.put(metric.getConcurrentRegistryName(), connection);
-            connection.setReadOnly(true);
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(metric.getQuery());
-            rs.next();
-            metricValue = Double.parseDouble(rs.getString(1));
+            if (rs.next()) {
+                metricValue = Double.parseDouble(rs.getString(1));
+            }
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
