@@ -1,6 +1,7 @@
-package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config;
+package local.infrastructure.custom_sql_exporter.model.config;
 
 import java.util.List;
+import java.util.Objects;
 
 public class MetricEntity {
     private String name;
@@ -68,7 +69,12 @@ public class MetricEntity {
     }
 
     public  String getConcurrentRegistryName() {
-        return name + "_" + metricType;
+        return name + "_" + hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, query, labels, metricType, connectId, timeout);
     }
 
     @Override
