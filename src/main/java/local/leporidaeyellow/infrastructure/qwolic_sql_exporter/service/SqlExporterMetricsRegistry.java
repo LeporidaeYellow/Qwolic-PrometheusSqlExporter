@@ -69,6 +69,7 @@ public class SqlExporterMetricsRegistry {
             connection = connectionService.popConnection(metric.getConnectId());
             connectionMap.put(metric.getConcurrentRegistryName(), connection);
             Statement statement = connection.createStatement();
+            statement.setQueryTimeout(Long.valueOf(metric.getTimeout()).intValue());
             ResultSet rs = statement.executeQuery(metric.getQuery());
             if (rs.next()) {
                 metricValue = Double.parseDouble(rs.getString(1));
