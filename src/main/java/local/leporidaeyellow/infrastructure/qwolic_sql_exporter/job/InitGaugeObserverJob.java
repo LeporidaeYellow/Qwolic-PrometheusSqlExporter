@@ -20,7 +20,7 @@ public class InitGaugeObserverJob {
     @Autowired
     ConcurrentMetricRegistryService concurrentRegistry;
 
-    @Scheduled(cron = "${scheduler.period}")
+    @Scheduled(cron = "${scheduler.period.observer}")
     public void taskForGauges() {
         executeSqlForGauges();
     }
