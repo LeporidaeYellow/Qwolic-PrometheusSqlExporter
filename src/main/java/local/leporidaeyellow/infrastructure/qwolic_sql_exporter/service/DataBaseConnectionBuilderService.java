@@ -14,10 +14,14 @@ public class DataBaseConnectionBuilderService {
     static private final String CLICKHOUSE_DB_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
 
     public Connection createDataBaseConnection(ConnectionEntity connectionEntity) throws ClassNotFoundException, SQLException {
+        Properties props = new Properties();
+        props.put("user", connectionEntity.getUser());
+        props.put("password", connectionEntity.getPass());
+
         //register driver class
         Class.forName(getDbDriver(connectionEntity.getDriverName()));
         //establish connection
-        Connection connection = DriverManager.getConnection(connectionEntity.getUrl(), connectionEntity.getUser(), connectionEntity.getPass());
+        Connection connection = DriverManager.getConnection(connectionEntity.getUrl(), props);
         connection.setReadOnly(true);
         return connection;
     }
