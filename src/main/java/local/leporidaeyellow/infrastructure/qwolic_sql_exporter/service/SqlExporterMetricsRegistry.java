@@ -74,26 +74,45 @@ public class SqlExporterMetricsRegistry {
             if (rs.next()) {
                 metricValue = Double.parseDouble(rs.getString(1));
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | ClassNotFoundException ex) {
+            logError("Ошибка при выполнении запроса: ", ex); // Логируем ошибку
         } finally {
-            closeConnection(connection);
+            closeResources(rs, statement, connection); // Закрываем ресурсы
         }
         return metricValue;
     }
 
-    public void closeConnection(Connection connection) {
-        if (connection != null) {
+        /** * Безопасно закрывает объекты JDBC, игнорируя возможные исключения. */
+    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
+        if (rs != null) {
             try {
-                connection.close();
-                if (!connection.isClosed()) {
-                    System.out.println("Connection is not closed");
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException ignored) {}
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ignored) {}
         }
     }
+
+    // public void closeConnection(Connection connection) {
+    //     if (connection != null) {
+    //         try {
+    //             connection.close();
+    //             if (!connection.isClosed()) {
+    //                 System.out.println("Connection is not closed");
+    //             }
+    //         } catch (SQLException e) {
+    //             throw new RuntimeException(e);
+    //         }
+    //     }
+    // }
 
     public void setValueToMetrics(MetricEntity metric, CompletableFuture<Double> future) {
         if (metric.getMetricType().equals(METRIC_COUNTER)) {
@@ -104,6 +123,12 @@ public class SqlExporterMetricsRegistry {
             AtomicInteger result = atomicIntegerMap.get(metric.getConcurrentRegistryName());
             result.set(future.join().intValue());
         }
+    }
+
+    /** * Простейшая реализация логирования ошибок. */
+    private void logError(String message, Exception exception) {
+        System.err.println(message + exception.getMessage());
+        exception.printStackTrace(System.err);
     }
 
     @Override
