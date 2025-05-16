@@ -1,5 +1,8 @@
 package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config;
 
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data.ConnectionEntity;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data.MetricEntity;
+
 import java.util.List;
 
 public class ConfigEntity {

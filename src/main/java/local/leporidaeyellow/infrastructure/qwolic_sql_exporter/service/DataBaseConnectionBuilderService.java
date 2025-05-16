@@ -1,36 +1,41 @@
 package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service;
 
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config.ConnectionEntity;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configuration.Constants;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data.ConnectionEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.Properties;
 
+@Slf4j
 @Service
 public class DataBaseConnectionBuilderService {
-    static private final String ORACLE_DB_DRIVER = "oracle.jdbc.driver.OracleDriver";
-    static private final String POSTGRES_DB_DRIVER = "org.postgresql.ds.PGSimpleDataSource";
-    static private final String CLICKHOUSE_DB_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
+    public Connection createDataBaseConnection(ConnectionEntity connectionEntity) {
+        try {
+            Properties props = new Properties();
+            props.put("user", connectionEntity.getUser());
+            props.put("password", connectionEntity.getPass());
 
-    public Connection createDataBaseConnection(ConnectionEntity connectionEntity) throws ClassNotFoundException, SQLException {
-        Properties props = new Properties();
-        props.put("user", connectionEntity.getUser());
-        props.put("password", connectionEntity.getPass());
-
-        //register driver class
-        Class.forName(getDbDriver(connectionEntity.getDriverName()));
-        //establish connection
-        Connection connection = DriverManager.getConnection(connectionEntity.getUrl(), props);
-        connection.setReadOnly(true);
-        return connection;
+            //register driver class
+            Class.forName(getDbDriver(connectionEntity.getDriverName()));
+            //establish connection
+            Connection connection = DriverManager.getConnection(connectionEntity.getUrl(), props);
+            connection.setReadOnly(true);
+            return connection;
+        } catch (Throwable ex) {
+            String errorFormattedString = String.format(Constants.ERROR_LOG_DB_CONNECTION_WITH_FORMATTED_STRING, connectionEntity.getDriverName(), connectionEntity.getConnectId());
+            log.error(errorFormattedString);
+        }
+        return null;
     }
 
     private String getDbDriver(String nameDb) {
         switch (nameDb) {
-            case "oracle": return ORACLE_DB_DRIVER;
-            case "postgresql": return POSTGRES_DB_DRIVER;
-            case "clickhouse": return CLICKHOUSE_DB_DRIVER;
+            case Constants.ORACLE_DB_DRIVER_NAME: return Constants.ORACLE_DB_DRIVER;
+            case Constants.POSTGRES_DB_DRIVER_NAME: return Constants.POSTGRES_DB_DRIVER;
+            case Constants.CLICKHOUSE_DB_DRIVER_NAME: return Constants.CLICKHOUSE_DB_DRIVER;
             default: return "ERROR name of driver";
         }
     }

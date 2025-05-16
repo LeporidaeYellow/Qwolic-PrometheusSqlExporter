@@ -1,45 +1,24 @@
 package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.job;
 
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config.MetricEntity;
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.ConcurrentMetricRegistryService;
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.ConfigService;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configuration.Constants;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.CleanConcurrentRegistryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Future;
-
+@Slf4j
 @Service
 @EnableScheduling
 public class CleanConcurrentRegistryJob {
     @Autowired
-    ConcurrentMetricRegistryService concurrentRegistry;
+    CleanConcurrentRegistryService cleanConcurrentRegistryService;
 
-    @Autowired
-    ConfigService configService;
-
-    @Scheduled(cron = "${scheduler.period.cleaner}")
+    @Scheduled(cron = Constants.APP_PROPERTIES_SCHEDULER_PERIOD_CLEANER)
     public void taskForCleanBlockedQuery() {
-        cleanRegistryByExpiredTimeout();
-    }
-
-    void cleanRegistryByExpiredTimeout() {
-        concurrentRegistry
-                .getKeysFromFutureMap()
-                .forEach(futureName -> {
-                    Future<?> future = concurrentRegistry.getFuture(futureName);
-                    if (timeoutIsExpired(futureName) && !future.isDone()) {
-                        future.cancel(true);
-                    }
-                });
-    }
-
-    Boolean timeoutIsExpired(String futureName) {
-        for (MetricEntity metric :configService.getMetricsEntitiesList()) {
-            if (metric.getConcurrentRegistryName().equals(futureName))
-                return metric.getTimeout() < concurrentRegistry.getDurationFromTimestampMap(metric);
-        }
-        return false;
+        log.debug(Constants.DEBUG_LOG_START_CLEAN_BLOCKED_QUERIES);
+        cleanConcurrentRegistryService.cleanRegistryByExpiredTimeout();
+        log.debug(Constants.DEBUG_LOG_STOP_CLEAN_BLOCKED_QUERIES);
     }
 }

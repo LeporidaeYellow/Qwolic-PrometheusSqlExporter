@@ -1,7 +1,9 @@
 package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service;
 
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config.ConnectionEntity;
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config.MetricEntity;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configuration.Constants;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data.ConnectionEntity;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data.MetricEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -16,15 +18,20 @@ import java.util.List;
 
 import static local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configuration.Constants.APPLICATION_CONFIGURATION_FILE;
 
+@Slf4j
 @Service
 public class ConfigService {
     private ConfigEntity config;
 
-    public ConfigService() throws FileNotFoundException {
-        InputStream inputStream = new FileInputStream(new File(APPLICATION_CONFIGURATION_FILE));
-        Constructor constructor = new Constructor(ConfigEntity.class, new LoaderOptions());
-        Yaml yaml = new Yaml(constructor);
-        this.config = yaml.load(inputStream);
+    public ConfigService() {
+        try {
+            InputStream inputStream = new FileInputStream(new File(APPLICATION_CONFIGURATION_FILE));
+            Constructor constructor = new Constructor(ConfigEntity.class, new LoaderOptions());
+            Yaml yaml = new Yaml(constructor);
+            this.config = yaml.load(inputStream);
+        } catch (FileNotFoundException ex) {
+            log.error(Constants.ERROR_LOG_WHILE_READING_CONFIG_FILE, ex);
+        }
     }
 
     public List<ConnectionEntity> getConnectionList() {
