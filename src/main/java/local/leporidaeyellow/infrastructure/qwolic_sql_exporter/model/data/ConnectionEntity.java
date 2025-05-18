@@ -1,4 +1,4 @@
-package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.config;
+package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.model.data;
 
 public class ConnectionEntity {
     private String name;

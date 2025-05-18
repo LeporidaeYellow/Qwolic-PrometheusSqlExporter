@@ -1,40 +1,25 @@
 package local.leporidaeyellow.infrastructure.qwolic_sql_exporter.job;
 
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.ConcurrentMetricRegistryService;
-import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.ConfigService;
 import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.configuration.Constants;
+import local.leporidaeyellow.infrastructure.qwolic_sql_exporter.service.ObserverService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
-
+@Slf4j
 @Service
 @EnableScheduling
 public class InitCounterObserverJob {
 
     @Autowired
-    ConfigService configService;
+    ObserverService observerService;
 
-    @Autowired
-    ConcurrentMetricRegistryService concurrentRegistry;
-
-    @Scheduled(cron = "${scheduler.period.observer}")
+    @Scheduled(cron = Constants.APP_PROPERTIES_SCHEDULER_PERIOD_OBSERVER)
     public void taskForCounters() {
-        executeSqlForCounters();
-    }
-
-    void executeSqlForCounters() {
-        configService
-                .getMetricEntityListByType(Constants.METRIC_COUNTER)
-                .parallelStream()
-                .forEach(metric -> {
-                    try {
-                        concurrentRegistry.proceedGettingMetric(metric);
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+        log.debug(Constants.DEBUG_LOG_START_COUNTER_OBSERVER);
+        observerService.executeSqlForCounters();
+        log.debug(Constants.DEBUG_LOG_STOP_COUNTER_OBSERVER);
     }
 }
